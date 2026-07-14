@@ -41,3 +41,6 @@ y_pred = pipeline.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
+joblib.dump(pipeline, 'fake_news_classifier.joblib')   
+
+
