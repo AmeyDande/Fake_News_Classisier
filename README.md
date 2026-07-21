@@ -2,7 +2,7 @@
 
 A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles) using TF-IDF + Logistic Regression. Deployed as a live FastAPI backend and Streamlit web app.
 
-**🔗 Live Demo:** [fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app](https://fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app/)
+**🔗 Live Demo:** [fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app](https://fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app/)  
 **🔗 API Docs:** [fake-news-classisier.onrender.com/docs](https://fake-news-classisier.onrender.com/docs)
 
 ---
