@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 
-PIPELINE_PATH = "fake_news_classifier.joblib"
+PIPELINE_PATH = "models/fake_news_classifier.joblib"
 
 try:
     pipeline = joblib.load(PIPELINE_PATH)
