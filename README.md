@@ -1,10 +1,8 @@
 # 📰 Fake News Classifier
 
-# 📰 Fake News Classifier
-
 A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles). Two model versions exist: a **TF-IDF + Logistic Regression** pipeline (v1, currently deployed) and a fine-tuned **DistilBERT** transformer (v2, in progress). v1 is deployed as a live FastAPI backend and Streamlit web app.
 
-**🔗 Live Demo:** [fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app](https://fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app/)  
+**🔗 Live Demo:** [fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app](https://fakenewsclassisier-sd8n2chzld7s3hpcjj78cz.streamlit.app/)  
 **🔗 API Docs:** [fake-news-classisier.onrender.com/docs](https://fake-news-classisier.onrender.com/docs)  
 **🔗 v2 Model (Hugging Face Hub):** [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)
 
