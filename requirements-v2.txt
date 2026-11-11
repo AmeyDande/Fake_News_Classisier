@@ -1,0 +1,9 @@
+# Training/v2 (DistilBERT) dependencies — used by notebooks/finetune_distilbert.ipynb
+# Keep these OUT of requirements.txt, which is used by the Render deploy.
+# No pins: the notebook ran in Colab with preinstalled versions (TODO: pin after a clean local run).
+pandas
+numpy
+scikit-learn
+transformers
+datasets
+huggingface_hub
