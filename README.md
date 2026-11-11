@@ -215,3 +215,4 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 ## Changelog
 
 - 2026-10-02 — `notebooks/train_tfidf.py` now resolves the dataset (`data/WELFake_Dataset.csv`) and model output (`models/fake_news_classifier.joblib`) from its own location instead of a hardcoded Windows path, so training works from any working directory.
+- 2026-10-02 — `app.py` `/predict` now returns HTTP 400 ("No words left after cleaning") when the input reduces to an empty string after cleaning, instead of a 500.

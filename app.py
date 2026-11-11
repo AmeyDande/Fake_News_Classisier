@@ -100,6 +100,8 @@ def predict_news(input_data: NewsInput):
             raise HTTPException(status_code=400, detail="Text input cannot be empty")
 
         cleaned = clean_text(combined)
+        if not cleaned:
+            raise HTTPException(status_code=400, detail="No words left after cleaning")
 
         pred_label = int(pipeline.predict([cleaned])[0])
         pred_proba = pipeline.predict_proba([cleaned])[0]
