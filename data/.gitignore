@@ -1,0 +1,6 @@
+# The WELFake dataset is ~72K articles and too large to commit.
+# Ignore the dataset files, but keep this folder (and .gitkeep) in the repo
+# so a fresh clone has data/ ready for the CSV to be dropped into.
+*
+!.gitignore
+!.gitkeep

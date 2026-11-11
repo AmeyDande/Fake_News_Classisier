@@ -222,3 +222,4 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 - 2026-10-02 — added `requirements-v2.txt` with the training-time (DistilBERT) dependencies used by `notebooks/finetune_distilbert.ipynb`, kept out of `requirements.txt` so the Render deploy stays light.
 - 2026-10-02 — honesty/polish fixes: `app.py` error message no longer mentions `main.py`, README corrected so v2 is described as trained-but-not-deployed and matching what the notebook actually does (body-only tokenization), Streamlit "About" expander now mentions the v2 model, and the frontend request timeout was raised from 30s to 60s for Render cold starts.
 - 2026-11-11 — README project tree now lists `data/` and `requirements-v2.txt`, and the run-together sentence in the v2 note was split into two.
+- 2026-11-11 — added a root `.gitignore` and a `data/.gitkeep`, so a fresh clone has the `data/` folder ready for the dataset and no longer shows `__pycache__` as untracked noise.
