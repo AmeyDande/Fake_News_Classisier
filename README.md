@@ -44,9 +44,11 @@ The frontend and backend are deployed independently and communicate over HTTP �
 ```
 Fake_News_Classisier/
 ├── README.md
-├── requirements.txt
+├── requirements.txt                # v1 runtime deps (used by the Render deploy)
+├── requirements-v2.txt             # v2 training deps (DistilBERT), not used by the deploy
 ├── app.py                          # FastAPI backend
 ├── streamlit_app.py                # Streamlit frontend
+├── data/                           # dataset folder (contents not committed)
 ├── models/
 │   └── fake_news_classifier.joblib # v1 artifact, isolated from code
 └── notebooks/
@@ -55,7 +57,7 @@ Fake_News_Classisier/
     └── finetune_distilbert.ipynb   # renamed from using-distilbest-v2.ipynb 
 ```
 
-> The v2 DistilBERT weights aren't committed to this repo — they're hosted on the Hugging Face Hub ([GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)) and loaded from there. v2 isn't wired into `app.py` yet; the deployed API still serves v1.v2 isn't deployed yet because Render's free-tier web service caps out at 512MB RAM, which isn't enough to load PyTorch, transformers, and the DistilBERT weights alongside the existing FastAPI app — deployment is blocked on either quantizing the model or moving inference to a host with more memory (e.g. Hugging Face Spaces).
+> The v2 DistilBERT weights aren't committed to this repo — they're hosted on the Hugging Face Hub ([GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)) and loaded from there. v2 isn't wired into `app.py` yet; the deployed API still serves v1. It isn't deployed because Render's free-tier web service caps out at 512MB RAM, which isn't enough to load PyTorch, transformers, and the DistilBERT weights alongside the existing FastAPI app — deployment is blocked on either quantizing the model or moving inference to a host with more memory (e.g. Hugging Face Spaces).
 
 
 ---
@@ -219,3 +221,4 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 - 2026-10-02 — `app.py` `/predict` now returns HTTP 400 ("No words left after cleaning") when the input reduces to an empty string after cleaning, instead of a 500.
 - 2026-10-02 — added `requirements-v2.txt` with the training-time (DistilBERT) dependencies used by `notebooks/finetune_distilbert.ipynb`, kept out of `requirements.txt` so the Render deploy stays light.
 - 2026-10-02 — honesty/polish fixes: `app.py` error message no longer mentions `main.py`, README corrected so v2 is described as trained-but-not-deployed and matching what the notebook actually does (body-only tokenization), Streamlit "About" expander now mentions the v2 model, and the frontend request timeout was raised from 30s to 60s for Render cold starts.
+- 2026-11-11 — README project tree now lists `data/` and `requirements-v2.txt`, and the run-together sentence in the v2 note was split into two.
