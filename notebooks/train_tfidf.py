@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import re
 import nltk
@@ -9,10 +11,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 
+ROOT = Path(__file__).resolve().parent.parent
+
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
-df = pd.read_csv('C:\\Users\\ASUS\\OneDrive\\Documents\\Fake_News_Classifier\\data\\WELFake_Dataset.csv')
+df = pd.read_csv(ROOT / 'data' / 'WELFake_Dataset.csv')
 
 def clean_text(text):
     text = str(text)
@@ -41,6 +45,6 @@ y_pred = pipeline.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
-joblib.dump(pipeline, 'fake_news_classifier.joblib')   
+joblib.dump(pipeline, ROOT / 'models' / 'fake_news_classifier.joblib')
 
 

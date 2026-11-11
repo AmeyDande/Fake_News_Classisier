@@ -107,7 +107,7 @@ This project uses the **WELFake** dataset (72,134 labeled news articles, merged 
 - Kaggle: [WELFake Dataset](https://www.kaggle.com/datasets/saurabhshahane/fake-news-classification)
 - Zenodo (original source): [zenodo.org/records/4561253](https://zenodo.org/records/4561253)
 
-After downloading, place `WELFake_Dataset.csv` in the same directory as `notebooks/train.py` before running the training script. The dataset is not included in this repo due to its size — only the trained model artifact (`fake_news_classifier.joblib`) is committed.
+After downloading, place `WELFake_Dataset.csv` in the `data/` folder before running `notebooks/train_tfidf.py` (the script resolves both the dataset and the model output path relative to the repo, so it works from any working directory). The dataset is not included in this repo due to its size — only the trained model artifact (`fake_news_classifier.joblib`) is committed.
 
 ---
 
@@ -209,3 +209,9 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 ## 🛠️ Tech Stack
 
 `Python` · `scikit-learn` · `NLTK` · `PyTorch` · `Transformers` · `Hugging Face Hub` · `FastAPI` · `Streamlit` · `Render` · `Streamlit Community Cloud`
+
+---
+
+## Changelog
+
+- 2026-10-02 — `notebooks/train_tfidf.py` now resolves the dataset (`data/WELFake_Dataset.csv`) and model output (`models/fake_news_classifier.joblib`) from its own location instead of a hardcoded Windows path, so training works from any working directory.
