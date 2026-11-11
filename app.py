@@ -30,7 +30,7 @@ try:
 except FileNotFoundError as e:
     raise RuntimeError(
         f"Model artifact not found: {e}. Make sure '{PIPELINE_PATH}' is in "
-        f"the same directory as main.py."
+        f"the same directory as app.py."
     )
 
 

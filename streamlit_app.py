@@ -25,6 +25,8 @@ with st.expander("ℹ️ About this project"):
         - **Accuracy:** 95.3%
         - **Backend:** FastAPI (deployed on Render)
         - **Frontend:** Streamlit (deployed on Streamlit Cloud)
+        - **v2 (DistilBERT):** a fine-tuned DistilBERT model (99.1% accuracy) exists on the
+          Hugging Face Hub but is not yet exposed via this API — this demo still uses v1
         """
     )
 
@@ -52,7 +54,7 @@ if predict_clicked:
                 response = requests.post(
                     PREDICT_ENDPOINT,
                     json={"title": news_title, "text": news_text},
-                    timeout=30,  # Render free tier can cold-start slowly
+                    timeout=60,  # Render free tier can cold-start slowly (30-50s)
                 )
 
                 if response.status_code == 200:

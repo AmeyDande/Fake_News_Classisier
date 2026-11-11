@@ -1,6 +1,6 @@
 # 📰 Fake News Classifier
 
-A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles). Two model versions exist: a **TF-IDF + Logistic Regression** pipeline (v1, currently deployed) and a fine-tuned **DistilBERT** transformer (v2, in progress). v1 is deployed as a live FastAPI backend and Streamlit web app.
+A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles). Two model versions exist: a **TF-IDF + Logistic Regression** pipeline (v1, currently deployed) and a fine-tuned **DistilBERT** transformer (v2 — trained and on the Hugging Face Hub, but not yet served by the deployed API). v1 is deployed as a live FastAPI backend and Streamlit web app.
 
 **🔗 Live Demo:** [fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app](https://fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app/)  
 **🔗 API Docs:** [fake-news-classisier.onrender.com/docs](https://fake-news-classisier.onrender.com/docs)  
@@ -15,7 +15,7 @@ A machine learning system that classifies news articles as **Real** or **Fake**,
 | **Task** | Binary text classification — Real vs. Fake news |
 | **Dataset** | [WELFake](https://zenodo.org/records/4561253) — 72,134 articles (35,028 real, 37,106 fake) |
 | **Model (v1, deployed)** | TF-IDF (50,000 features) → Logistic Regression — 95.3% accuracy |
-| **Model (v2, in progress)** | Fine-tuned `distilbert-base-uncased` — 99.1% accuracy, 0.99 F1 |
+| **Model (v2 — trained, not yet deployed)** | Fine-tuned `distilbert-base-uncased` — 99.1% accuracy, 0.99 F1 |
 | **Backend** | FastAPI, deployed on Render |
 | **Frontend** | Streamlit, deployed on Streamlit Community Cloud |
 
@@ -81,9 +81,9 @@ Fake_News_Classisier/
 
 **Why DistilBERT.** TF-IDF + Logistic Regression scores words independently, so it can't tell "the bill passed easily" from "the bill barely passed" — it has no sense of word order or context. DistilBERT is a distilled version of BERT (40% fewer parameters, ~60% faster) that keeps most of BERT's language understanding, making it a practical choice for fine-tuning on a single Colab GPU without the full compute cost of BERT-base.
 
-**1. No manual text cleaning.** Unlike v1's `clean_text()` pipeline, the raw `title + text` string is passed directly to the tokenizer — no stopword removal, no lowercasing, no stripping punctuation. Transformer tokenizers are trained to make use of casing, punctuation, and stopwords as context signals, so stripping them out (as TF-IDF requires) would throw away information the model can otherwise use.
+**1. No manual text cleaning.** Unlike v1's `clean_text()` pipeline, the raw article body (`text` only — see step 2) is passed directly to the tokenizer — no stopword removal, no lowercasing, no stripping punctuation. Transformer tokenizers are trained to make use of casing, punctuation, and stopwords as context signals, so stripping them out (as TF-IDF requires) would throw away information the model can otherwise use.
 
-**2. Tokenization.** Each example is tokenized with `truncation=True, padding="max_length", max_length=512` — articles are cut off at 512 tokens (DistilBERT's context limit) and padded to a uniform length so they batch together.
+**2. Tokenization.** Each example's `text` (article body only — the `title` column is not used by v2) is tokenized with `truncation=True, padding="max_length", max_length=512` — articles are cut off at 512 tokens (DistilBERT's context limit) and padded to a uniform length so they batch together.
 
 **3. Data split.** Unlike v1's 80/20 train-test split, v2 uses an **80/10/10 train/validation/test** split. The extra validation set exists specifically to pick the best checkpoint during training (see below) rather than just training blind for a fixed number of steps.
 
@@ -185,9 +185,10 @@ Response:
 - **Labels:** `0 = Fake`, `1 = Real` (WELFake convention)
 - **Evaluation:** 95.3% accuracy on a held-out test split (80/20 train-test)
 
-### v2 — Fine-tuned DistilBERT (in progress)
+### v2 — Fine-tuned DistilBERT (trained, not yet deployed)
 
-- **Base model:** `distilbert-base-uncased`, fine-tuned end-to-end (2 epochs, fp16, batch size 8/16)
+- **Base model:** `distilbert-base-uncased`, fine-tuned end-to-end (2 epochs, fp16, train batch size 8 / eval batch size 16)
+- **Input:** article body (`text`) only — the `title` column is not used (unlike v1)
 - **Labels:** `0 = Fake`, `1 = Real` (same convention as v1)
 - **Evaluation:** 99.1% accuracy, 0.99 F1 on a held-out test split (80/10/10 train/val/test)
 - **Weights:** hosted on the Hugging Face Hub — [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)
@@ -217,3 +218,4 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 - 2026-10-02 — `notebooks/train_tfidf.py` now resolves the dataset (`data/WELFake_Dataset.csv`) and model output (`models/fake_news_classifier.joblib`) from its own location instead of a hardcoded Windows path, so training works from any working directory.
 - 2026-10-02 — `app.py` `/predict` now returns HTTP 400 ("No words left after cleaning") when the input reduces to an empty string after cleaning, instead of a 500.
 - 2026-10-02 — added `requirements-v2.txt` with the training-time (DistilBERT) dependencies used by `notebooks/finetune_distilbert.ipynb`, kept out of `requirements.txt` so the Render deploy stays light.
+- 2026-10-02 — honesty/polish fixes: `app.py` error message no longer mentions `main.py`, README corrected so v2 is described as trained-but-not-deployed and matching what the notebook actually does (body-only tokenization), Streamlit "About" expander now mentions the v2 model, and the frontend request timeout was raised from 30s to 60s for Render cold starts.
