@@ -205,7 +205,7 @@ Response:
 
 - **Base model:** `distilbert-base-uncased`, fine-tuned end-to-end (2 epochs, fp16, train batch size 8 / eval batch size 16)
 - **Input:** article body (`text`) only — the `title` column is not used (unlike v1)
-- **Labels:** `0 = Fake`, `1 = Real` (same convention as v1)
+- **Labels:** `0 = Real`, `1 = Fake` (matches the class counts above; the Space's label names are set to this mapping)
 - **Evaluation:** 99.1% accuracy, 0.99 F1 on a held-out test split (80/10/10 train/val/test)
 - **Weights:** hosted on the Hugging Face Hub — [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)
 - **Status:** trained, evaluated, and deployed as a Gradio app on [Hugging Face Spaces](https://huggingface.co/spaces/GhostFaith/fake-news-classifier); not integrated into the FastAPI backend, which still serves v1
@@ -228,13 +228,3 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 `Python` · `scikit-learn` · `NLTK` · `PyTorch` · `Transformers` · `Hugging Face Hub` · `Hugging Face Spaces` · `Gradio` · `FastAPI` · `Streamlit` · `Render` · `Streamlit Community Cloud`
 
 ---
-
-## Changelog
-
-- 2026-10-02 — `notebooks/train_tfidf.py` now resolves the dataset (`data/WELFake_Dataset.csv`) and model output (`models/fake_news_classifier.joblib`) from its own location instead of a hardcoded Windows path, so training works from any working directory.
-- 2026-10-02 — `app.py` `/predict` now returns HTTP 400 ("No words left after cleaning") when the input reduces to an empty string after cleaning, instead of a 500.
-- 2026-10-02 — added `requirements-v2.txt` with the training-time (DistilBERT) dependencies used by `notebooks/finetune_distilbert.ipynb`, kept out of `requirements.txt` so the Render deploy stays light.
-- 2026-10-02 — honesty/polish fixes: `app.py` error message no longer mentions `main.py`, README corrected so v2 is described as trained-but-not-deployed and matching what the notebook actually does (body-only tokenization), Streamlit "About" expander now mentions the v2 model, and the frontend request timeout was raised from 30s to 60s for Render cold starts.
-- 2026-11-11 — README project tree now lists `data/` and `requirements-v2.txt`, and the run-together sentence in the v2 note was split into two.
-- 2026-11-11 — added a root `.gitignore` and a `data/.gitkeep`, so a fresh clone has the `data/` folder ready for the dataset and no longer shows `__pycache__` as untracked noise.
-- 2026-11-12 — v2 (DistilBERT) is now deployed as a Gradio app on [Hugging Face Spaces](https://huggingface.co/spaces/GhostFaith/fake-news-classifier), replacing the "trained, not yet deployed" status throughout this README. The FastAPI backend and Streamlit app still serve v1.
