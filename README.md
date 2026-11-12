@@ -1,9 +1,10 @@
 # 📰 Fake News Classifier
 
-A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles). Two model versions exist: a **TF-IDF + Logistic Regression** pipeline (v1, currently deployed) and a fine-tuned **DistilBERT** transformer (v2 — trained and on the Hugging Face Hub, but not yet served by the deployed API). v1 is deployed as a live FastAPI backend and Streamlit web app.
+A machine learning system that classifies news articles as **Real** or **Fake**, trained on the WELFake dataset (72K+ articles). Two model versions exist, and both are live: a **TF-IDF + Logistic Regression** pipeline (v1, served by a FastAPI backend and Streamlit web app) and a fine-tuned **DistilBERT** transformer (v2, served as a Gradio app on Hugging Face Spaces).
 
-**🔗 Live Demo:** [fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app](https://fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app/)  
+**🔗 Live Demo (v1):** [fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app](https://fakenewsclassisier-6menjrgvjvohz969yc8kxp.streamlit.app/)  
 **🔗 API Docs:** [fake-news-classisier.onrender.com/docs](https://fake-news-classisier.onrender.com/docs)  
+**🔗 Live Demo (v2, DistilBERT):** [huggingface.co/spaces/GhostFaith/fake-news-classifier](https://huggingface.co/spaces/GhostFaith/fake-news-classifier)  
 **🔗 v2 Model (Hugging Face Hub):** [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)
 
 ---
@@ -15,9 +16,10 @@ A machine learning system that classifies news articles as **Real** or **Fake**,
 | **Task** | Binary text classification — Real vs. Fake news |
 | **Dataset** | [WELFake](https://zenodo.org/records/4561253) — 72,134 articles (35,028 real, 37,106 fake) |
 | **Model (v1, deployed)** | TF-IDF (50,000 features) → Logistic Regression — 95.3% accuracy |
-| **Model (v2 — trained, not yet deployed)** | Fine-tuned `distilbert-base-uncased` — 99.1% accuracy, 0.99 F1 |
-| **Backend** | FastAPI, deployed on Render |
-| **Frontend** | Streamlit, deployed on Streamlit Community Cloud |
+| **Model (v2, deployed)** | Fine-tuned `distilbert-base-uncased` — 99.1% accuracy, 0.99 F1 |
+| **Backend (v1)** | FastAPI, deployed on Render |
+| **Frontend (v1)** | Streamlit, deployed on Streamlit Community Cloud |
+| **Serving (v2)** | Gradio app on Hugging Face Spaces (ZeroGPU) |
 
 ---
 
@@ -36,6 +38,8 @@ A machine learning system that classifies news articles as **Real** or **Fake**,
 ```
 
 The frontend and backend are deployed independently and communicate over HTTP — the same pattern as my [Titanic Survival Predictor](https://github.com/AmeyDande/Titanic-analysis.git) project.
+
+v2 is served separately: a standalone Gradio app on Hugging Face Spaces loads the DistilBERT weights from the Hub and runs inference there, so it doesn't go through the FastAPI backend above.
 
 ---
 
@@ -57,7 +61,7 @@ Fake_News_Classisier/
     └── finetune_distilbert.ipynb   # renamed from using-distilbest-v2.ipynb 
 ```
 
-> The v2 DistilBERT weights aren't committed to this repo — they're hosted on the Hugging Face Hub ([GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)) and loaded from there. v2 isn't wired into `app.py` yet; the deployed API still serves v1. It isn't deployed because Render's free-tier web service caps out at 512MB RAM, which isn't enough to load PyTorch, transformers, and the DistilBERT weights alongside the existing FastAPI app — deployment is blocked on either quantizing the model or moving inference to a host with more memory (e.g. Hugging Face Spaces).
+> The v2 DistilBERT weights aren't committed to this repo — they're hosted on the Hugging Face Hub ([GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)) and loaded from there. v2 isn't wired into `app.py`; the FastAPI API still serves v1. Render's free-tier web service caps out at 512MB RAM, which isn't enough to load PyTorch, transformers, and the DistilBERT weights alongside the existing FastAPI app, so v2 is served from a separate Hugging Face Space instead (see Deployment below).
 
 
 ---
@@ -151,6 +155,16 @@ streamlit run streamlit_app.py
 | Main file | `streamlit_app.py` |
 | Repo | Same repo as backend |
 
+### v2 → Hugging Face Spaces
+| Setting | Value |
+|---|---|
+| Space | [GhostFaith/fake-news-classifier](https://huggingface.co/spaces/GhostFaith/fake-news-classifier) |
+| SDK | Gradio |
+| Hardware | ZeroGPU |
+| Model | Loaded from [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews) |
+
+The Space's code lives in the Space repo, not this one. Its `app.py` loads the model once at startup with a `transformers` text-classification pipeline (truncation at 512 tokens) and wraps prediction in a small Gradio interface. On ZeroGPU hardware, `import spaces` must come before any other CUDA-related import, and the prediction function is decorated with `@spaces.GPU`.
+
 ---
 
 ## 📡 API Reference
@@ -187,14 +201,14 @@ Response:
 - **Labels:** `0 = Fake`, `1 = Real` (WELFake convention)
 - **Evaluation:** 95.3% accuracy on a held-out test split (80/20 train-test)
 
-### v2 — Fine-tuned DistilBERT (trained, not yet deployed)
+### v2 — Fine-tuned DistilBERT (deployed on Hugging Face Spaces)
 
 - **Base model:** `distilbert-base-uncased`, fine-tuned end-to-end (2 epochs, fp16, train batch size 8 / eval batch size 16)
 - **Input:** article body (`text`) only — the `title` column is not used (unlike v1)
 - **Labels:** `0 = Fake`, `1 = Real` (same convention as v1)
 - **Evaluation:** 99.1% accuracy, 0.99 F1 on a held-out test split (80/10/10 train/val/test)
 - **Weights:** hosted on the Hugging Face Hub — [GhostFaith/distilbert-fakenews](https://huggingface.co/GhostFaith/distilbert-fakenews)
-- **Status:** trained and evaluated, not yet integrated into the deployed FastAPI backend
+- **Status:** trained, evaluated, and deployed as a Gradio app on [Hugging Face Spaces](https://huggingface.co/spaces/GhostFaith/fake-news-classifier); not integrated into the FastAPI backend, which still serves v1
 
 ### ⚠️ Known Limitation (applies to both versions)
 
@@ -204,14 +218,14 @@ In practice, this means:
 - Well-written misinformation that mimics the tone of "real" training sources can be misclassified as Real
 - Legitimate news that doesn't closely match the vocabulary patterns in the "real" training data can be misclassified as Fake
 
-This is a known limitation of TF-IDF + linear model approaches, and was the original motivation for fine-tuning a transformer (v2) that captures semantic meaning rather than just word frequency. v2's much higher accuracy (99.1% vs. 95.3%) is a promising signal, but hasn't yet been validated on out-of-distribution articles (i.e. news from sources outside WELFake) — so it's not yet confirmed whether the gain reflects genuine semantic understanding or just a stronger fit to the same source-level artifacts. Out-of-distribution testing is a planned next step before v2 replaces v1 in production.
+This is a known limitation of TF-IDF + linear model approaches, and was the original motivation for fine-tuning a transformer (v2) that captures semantic meaning rather than just word frequency. v2's much higher accuracy (99.1% vs. 95.3%) is a promising signal, but hasn't yet been validated on out-of-distribution articles (i.e. news from sources outside WELFake) — so it's not yet confirmed whether the gain reflects genuine semantic understanding or just a stronger fit to the same source-level artifacts. Both versions are now live, but out-of-distribution testing is still a planned next step before v2 should be trusted over v1.
 
 
 ---
 
 ## 🛠️ Tech Stack
 
-`Python` · `scikit-learn` · `NLTK` · `PyTorch` · `Transformers` · `Hugging Face Hub` · `FastAPI` · `Streamlit` · `Render` · `Streamlit Community Cloud`
+`Python` · `scikit-learn` · `NLTK` · `PyTorch` · `Transformers` · `Hugging Face Hub` · `Hugging Face Spaces` · `Gradio` · `FastAPI` · `Streamlit` · `Render` · `Streamlit Community Cloud`
 
 ---
 
@@ -223,3 +237,4 @@ This is a known limitation of TF-IDF + linear model approaches, and was the orig
 - 2026-10-02 — honesty/polish fixes: `app.py` error message no longer mentions `main.py`, README corrected so v2 is described as trained-but-not-deployed and matching what the notebook actually does (body-only tokenization), Streamlit "About" expander now mentions the v2 model, and the frontend request timeout was raised from 30s to 60s for Render cold starts.
 - 2026-11-11 — README project tree now lists `data/` and `requirements-v2.txt`, and the run-together sentence in the v2 note was split into two.
 - 2026-11-11 — added a root `.gitignore` and a `data/.gitkeep`, so a fresh clone has the `data/` folder ready for the dataset and no longer shows `__pycache__` as untracked noise.
+- 2026-11-12 — v2 (DistilBERT) is now deployed as a Gradio app on [Hugging Face Spaces](https://huggingface.co/spaces/GhostFaith/fake-news-classifier), replacing the "trained, not yet deployed" status throughout this README. The FastAPI backend and Streamlit app still serve v1.
